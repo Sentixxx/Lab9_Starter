@@ -86,8 +86,12 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    const SECRET_TOKEN = "youdontknow";
+    window.TrackJS && TrackJS.install({
+      token: SECRET_TOKEN
+    });
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -168,7 +172,7 @@
         domElement.innerHTML = '10';
       } catch (error) {
         errFlag = true;
-        throw error;
+        throw new MyError(error.message);
       } finally {
         if (errFlag) {
           console.log('Global Error made');
@@ -182,15 +186,23 @@
       try {
         makeGlobalError();
       } catch (error) {
-        console.error("Error: " + error.message);
-        throw error;
+        console.log(`${error.name}: ${error.message}`);
+        TrackJS.track(error);
       } finally {
         if (errFlag) {
           console.log('Global Error triggered');
         }
       }
     }
+
+    class MyError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'MyError';
+      }
+    }
   </script>
+
 </body>
 
 </html>
